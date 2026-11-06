@@ -162,6 +162,15 @@
   flex-direction: column;
 }
 
+
+    /* Capital: saldo manual guardado solo en este navegador */
+    .capital-panel{max-width:450px;margin:22px auto;background:#fff;border-radius:14px;padding:16px;box-shadow:0 4px 10px #0001;text-align:left}
+    .capital-panel summary{cursor:pointer;font-weight:700;color:#176b37;list-style-position:inside}
+    .capital-body{padding-top:16px}.capital-total{font-size:30px;color:#176b37;font-weight:800;margin:8px 0 20px}
+    .capital-panel label{display:block;font-size:14px;margin:0 0 8px}
+    .capital-panel input{width:100%;padding:12px;border:1px solid #b5c7bd;border-radius:9px;font-size:17px}
+    .capital-panel button{background:#16843e;color:white;border:0;padding:12px 18px;border-radius:9px;font-weight:700;margin-top:12px;width:100%;cursor:pointer}
+    .capital-panel .capital-help{color:#66746b;font-size:12px;line-height:1.45}
   </style>
   
 </head>
@@ -1673,6 +1682,18 @@
 
   </main>
 
+  <details class="capital-panel" id="capital-panel">
+    <summary>Capital</summary>
+    <div class="capital-body">
+      <div>Capital actual</div><div class="capital-total" id="capital-total">$0.00</div>
+      <form id="capital-form">
+        <label for="capital-input">Cantidad de capital que tienes ($ MXN)</label>
+        <input id="capital-input" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="Escribe tu capital">
+        <button type="submit">Guardar capital</button>
+      </form>
+      <p class="capital-help">Este monto se captura manualmente y no se suma a ventas ni pedidos. Solo se guarda en este navegador; no es una cuenta protegida ni se sincroniza con otros dispositivos.</p>
+    </div>
+  </details>
   <footer>
     <p>Pide Con Nosotros por <a href="https://wa.me/523311013156" target="_blank">WhatsApp</a></p>
   </footer>
@@ -1702,5 +1723,23 @@
   }
 </script>
 
+  <script>
+    (() => {
+      const key='estacion_capital_manual_v1';
+      const input=document.getElementById('capital-input');
+      const total=document.getElementById('capital-total');
+      const fmt=n=>n.toLocaleString('es-MX',{style:'currency',currency:'MXN'});
+      function show(){const value=Number(localStorage.getItem(key));total.textContent=fmt(Number.isFinite(value)&&value>=0?value:0)}
+      try{show()}catch{total.textContent=fmt(0)}
+      document.getElementById('capital-form').addEventListener('submit',e=>{
+        e.preventDefault();const raw=input.value.trim(),amount=Number(raw);
+        if(!raw||!Number.isFinite(amount)||amount<0){input.setCustomValidity('Ingresa una cantidad válida');input.reportValidity();return}
+        input.setCustomValidity('');
+        try{localStorage.setItem(key,String(amount));show();input.value='';alert('Capital guardado en este dispositivo')}
+        catch{alert('No se pudo guardar. Revisa el almacenamiento del navegador')}
+      });
+      input.addEventListener('input',()=>input.setCustomValidity(''));
+    })();
+  </script>
 </body>
 </html>
